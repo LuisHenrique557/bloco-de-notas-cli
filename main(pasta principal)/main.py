@@ -20,6 +20,7 @@ def main():
         except ValueError as e:
             if '[bold red]' in str(e):
                 console.print(str(e))
+
             else:
                 console.print('[bold red]Opção inválida![/bold red]')
         else:
