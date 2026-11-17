@@ -23,7 +23,7 @@ class Opcao:
 
         console.print(tabela)
 
-    
+
 
 
 def main():
@@ -31,5 +31,3 @@ def main():
     menu.exibir()
 
 
-if __name__ == '__main__':
-    main()
