@@ -41,6 +41,8 @@ def main():
             nota.salvar_txt()
             console.print(f'[bold green]Arquivo "{nota.obter_nome_arquivo()}" criado com sucesso![/bold green]')
 
+    if esc == 2:
+        Nota.amostrar_notas()
 
 if __name__ == '__main__':
     main()

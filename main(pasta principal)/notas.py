@@ -23,3 +23,27 @@ class Nota:
         with open(nome_arquivo, "w", encoding="utf-8") as arquivo:
             arquivo.write(f"=== {self.titulo.upper()} ===\n\n")
             arquivo.write(f"{self.anotacao}\n")
+    @classmethod
+    def amostrar_notas(self):
+        notas = [arq for arq in  os.listdir() if arq.endswith(".txt")]
+
+        if not notas:
+            print("Nenhuma nota encontrada.")
+        else:
+            print("\n --SUAS NOTAS-- \n")
+            for indice, nome_arquivo in enumerate(notas, start=1):
+                titulo_limpo = nome_arquivo.replace(".txt", "")
+                print(f"{indice} - {titulo_limpo}")
+
+            escolha = int(input("\nDigite o número da nota que voce quer ler: "))
+
+            posicao = escolha - 1
+
+            if 0 <= posicao < len(notas):
+                arquivo_selecionado = notas[posicao]
+
+                with open(arquivo_selecionado, "r", encoding="utf-8") as f:
+                    print(f.read())
+
+            else:
+                print("Número inválido!")
