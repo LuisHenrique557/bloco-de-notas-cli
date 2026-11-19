@@ -1,0 +1,12 @@
+# Base de dados local do SQLite
+*.db
+bloco_de_notas.db
+
+# Ficheiros de teste individuais (.txt)
+*.txt
+
+# Ambiente virtual e caches do Python / PyCharm
+.venv/
+venv/
+__pycache__/
+.idea/
