@@ -29,12 +29,11 @@ def main():
     if esc == 1:
         tit = str(input('Digite o titulo do bloco de notas: ')).strip()
 
-        # Instanciamos temporariamente para testar a existência
-        nota_teste = Nota(titulo=tit, anotacao="")
+
 
         # Validação: impede a criação se o título já existir
-        if nota_teste.arquivo_existe():
-            console.print(f'[bold red]Erro: Já existe uma nota com o título "{tit}.txt"![/bold red]')
+        if Nota.arquivo_existe(tit):
+            console.print(f'[bold red]Erro: Já existe uma nota com o título "{tit}"![/bold red]')
         else:
             anot = str(input(f'Anotação do {tit}: '))
             nota = Nota(titulo=tit, anotacao=anot)
@@ -42,7 +41,11 @@ def main():
             console.print(f'[bold green]Arquivo "{nota.obter_nome_arquivo()}" criado com sucesso![/bold green]')
 
     if esc == 2:
-        Nota.amostrar_notas()
+        bloco.escolher_nota()
+
+
+    if esc == 3:
+        print('Saindo do bloco de notas!')
 
 if __name__ == '__main__':
     main()
