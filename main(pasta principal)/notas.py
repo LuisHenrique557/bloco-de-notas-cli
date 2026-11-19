@@ -1,57 +1,78 @@
-import os
+import sqlite3
+
+DB_NAME = "bloco_de_notas.db"
+
 
 class Nota:
     def __init__(self, titulo: str, anotacao: str):
-        # Remove caracteres inválidos para nomes de arquivos no sistema operacional
-        self.titulo = titulo.strip()
+        self.titulo = self.limpa_titulo(titulo)
         self.anotacao = anotacao
 
     @staticmethod
-    def limpa_titulo(titulo: str) -> str:
-        """Deixa o titulo limpo sem nada de caracteres"""
-        titulo_limpo = titulo.strip().replace("/", "-").replace("\\", "-")
-
-        if titulo_limpo.lower().endswith(".txt"):
-            titulo_limpo = titulo_limpo[:-4]
-
-        return titulo_limpo
-
-    def obter_nome_arquivo(self) -> str:
-        """Gera o nome do arquivo substituindo espaços por sublinhados se necessário."""
-        nome_limpo = self.titulo.replace("/", "-").replace("\\", "-").replace(".txt", "")
-        return f"{nome_limpo}.txt"
+    def iniciar_banco():
+        """Cria a tabela no banco de dados SQLite caso ela ainda não exista."""
+        with sqlite3.connect(DB_NAME) as conexao:
+            cursor = conexao.cursor()
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS notas (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    titulo TEXT UNIQUE NOT NULL,
+                    anotacao TEXT NOT NULL
+                )
+            """)
+            conexao.commit()
 
     @staticmethod
-    def arquivo_existe(titulo: str) -> str:
-        """Verifica se já existe um arquivo com este título."""
+    def limpa_titulo(titulo: str) -> str:
+        """Limpa espaços extras nas extremidades do título."""
+        return titulo.strip()
 
+    @staticmethod
+    def arquivo_existe(titulo: str) -> bool:
+        """Verifica no banco de dados se já existe uma nota registrada com este título."""
         titulo_limpo = Nota.limpa_titulo(titulo)
-        nome_arquivo = f"{titulo_limpo}.txt"
-        return os.path.exists(nome_arquivo)
+        with sqlite3.connect(DB_NAME) as conexao:
+            cursor = conexao.cursor()
+            cursor.execute("SELECT 1 FROM notas WHERE LOWER(titulo) = LOWER(?)", (titulo_limpo,))
+            return cursor.fetchone() is not None
 
-    def salvar_txt(self):
-        """Salva a nota em um arquivo de texto individual (.txt)."""
-        nome_arquivo = self.obter_nome_arquivo()
+    def salvar_db(self):
+        """Insere a nota atual como um novo registro na tabela 'notas'."""
+        with sqlite3.connect(DB_NAME) as conexao:
+            cursor = conexao.cursor()
+            cursor.execute(
+                "INSERT INTO notas (titulo, anotacao) VALUES (?, ?)",
+                (self.titulo, self.anotacao)
+            )
+            conexao.commit()
 
-        with open(nome_arquivo, "w", encoding="utf-8") as arquivo:
-            arquivo.write(f"=== {self.titulo.upper()} ===\n\n")
-            arquivo.write(f"{self.anotacao}\n")
     @classmethod
-    def amostrar_notas(cls):
-        notas = [arq for arq in  os.listdir() if arq.endswith(".txt")]
+    def amostrar_notas(cls) -> list:
+        """Busca todos os títulos cadastrados no banco de dados."""
+        with sqlite3.connect(DB_NAME) as conexao:
+            cursor = conexao.cursor()
+            cursor.execute("SELECT titulo FROM notas ORDER BY id ASC")
+            registros = cursor.fetchall()
 
-        if not notas:
+        if not registros:
             print("Nenhuma nota encontrada.")
-        else:
-            print("\n --SUAS NOTAS-- \n")
-            for indice, nome_arquivo in enumerate(notas, start=1):
-                titulo_limpo = nome_arquivo.replace(".txt", "")
-                print(f"{indice} - {titulo_limpo}")
+            return []
 
-        return notas
+        print("\n --SUAS NOTAS-- \n")
+        titulos = []
+        for indice, (titulo,) in enumerate(registros, start=1):
+            print(f"{indice} - {titulo}")
+            titulos.append(titulo)
+
+        return titulos
 
     @classmethod
-    def ler_notas(cls, nome_arquivo: str) -> str:
-        """ler e retorna o arquivo selecionado."""
-        with open(nome_arquivo, "r", encoding="utf-8") as arquivo:
-            return arquivo.read()
+    def ler_notas(cls, titulo: str) -> str:
+        """Retorna o conteúdo textual da anotação referente ao título fornecido."""
+        with sqlite3.connect(DB_NAME) as conexao:
+            cursor = conexao.cursor()
+            cursor.execute("SELECT anotacao FROM notas WHERE titulo = ?", (titulo,))
+            resultado = cursor.fetchone()
+            if resultado:
+                return resultado[0]
+            return "Nota não encontrada."

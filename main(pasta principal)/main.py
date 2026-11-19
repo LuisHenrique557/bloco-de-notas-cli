@@ -6,6 +6,9 @@ console = Console(force_terminal=True)
 
 
 def main():
+    # Inicializa o banco de dados e cria a tabela 'notas' se necessário
+    Nota.iniciar_banco()
+
     bloco = Opcao()
     bloco.exibir()
 
@@ -29,20 +32,17 @@ def main():
     if esc == 1:
         tit = str(input('Digite o titulo do bloco de notas: ')).strip()
 
-
-
-        # Validação: impede a criação se o título já existir
+        # Validação: impede a criação se o título já existir no banco
         if Nota.arquivo_existe(tit):
             console.print(f'[bold red]Erro: Já existe uma nota com o título "{tit}"![/bold red]')
         else:
             anot = str(input(f'Anotação do {tit}: '))
             nota = Nota(titulo=tit, anotacao=anot)
-            nota.salvar_txt()
-            console.print(f'[bold green]Arquivo "{nota.obter_nome_arquivo()}" criado com sucesso![/bold green]')
+            nota.salvar_db()
+            console.print(f'[bold green]Nota "{nota.titulo}" salva no banco de dados com sucesso![/bold green]')
 
     if esc == 2:
         bloco.escolher_nota()
-
 
     if esc == 3:
         print('Saindo do bloco de notas!')
