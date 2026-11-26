@@ -10,3 +10,5 @@ bloco_de_notas.db
 venv/
 __pycache__/
 .idea/
+*.pyc
+!requirements.txt
